@@ -1,5 +1,5 @@
 # base image
-FROM node:alpine as builder
+FROM node: alpine
 
 # set working directory
 WORKDIR /usr/src/app
