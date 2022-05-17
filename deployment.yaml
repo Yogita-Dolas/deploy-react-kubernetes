@@ -19,6 +19,9 @@ metadata:
   name: deploy-react-kubernetes-deployment
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: app
   template:
     metadata:
       labels:
