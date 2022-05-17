@@ -1,0 +1,48 @@
+# Node.js with React
+# Build a Node.js project that uses React.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- master
+
+pool:
+  vmImage: ubuntu-latest
+  
+steps:
+- task: Docker@2
+  inputs:
+    containerRegistry: 'ArgonDocker_SC'
+    repository: 'ArgonReactJSRepo'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+
+- task: ArchiveFiles@2
+  displayName: 'Archive files'
+  inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+
+
+- upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+  artifact: drop
+
+- task: KubernetesManifest@0
+  displayName: Create imagePullSecret
+  inputs:
+              action: createSecret
+              secretName: reactappsecret
+              namespace: default
+              dockerRegistryEndpoint: ArgonDocker_SC
+              kubernetesServiceConnection: 'React_AKS_SC'
+- task: KubernetesManifest@0
+  inputs:
+    action: 'deploy'
+    kubernetesServiceConnection: 'React_AKS_SC'
+    namespace: 'default'
+    manifests: |
+      **/deployment.yml
+    imagePullSecrets: reactappsecret
