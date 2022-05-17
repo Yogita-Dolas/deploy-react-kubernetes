@@ -7,7 +7,7 @@ trigger:
 - windows_env
 
 pool:
-  vmImage: windows-2022
+  vmImage: windows-latest
   
 steps:
 - task: Docker@2
