@@ -8,10 +8,10 @@ trigger:
 
 strategy:
   matrix:
-    linux:
-      imageName: "ubuntu-latest"
     windows:
       imageName: "windows-latest"
+    linux:
+      imageName: "ubuntu-latest"
   maxParallel: 2
 
 pool:
