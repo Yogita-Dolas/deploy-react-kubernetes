@@ -7,7 +7,7 @@ trigger:
 - master
 
 pool:
-  name: Windows
+  name: YogitaWindows
   
 steps:
 - task: Docker@2
