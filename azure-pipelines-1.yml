@@ -8,14 +8,41 @@ trigger:
 
 pool:
   vmImage: windows-latest
-
+  
 steps:
-- task: NodeTool@0
+- task: Docker@2
   inputs:
-    versionSpec: '12.x'
-  displayName: 'Install Node.js'
+    containerRegistry: 'ArgonDocker_SC'
+    repository: 'ArgonReactJSRepo'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
 
-- script: |
-    npm install
-    npm run build
-  displayName: 'npm install and build'
+- task: ArchiveFiles@2
+  displayName: 'Archive files'
+  inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+
+
+- upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+  artifact: drop
+
+- task: KubernetesManifest@0
+  displayName: Create imagePullSecret
+  inputs:
+              action: createSecret
+              secretName: reactappsecret
+              namespace: default
+              dockerRegistryEndpoint: ArgonDocker_SC
+              kubernetesServiceConnection: 'React_AKS_SC'
+- task: KubernetesManifest@0
+  inputs:
+    action: 'deploy'
+    kubernetesServiceConnection: 'React_AKS_SC'
+    namespace: 'default'
+    manifests: |
+      deployment.yaml
+    imagePullSecrets: reactappsecret
