@@ -7,7 +7,7 @@ trigger:
 - master
 
 pool:
-  vmImage: Yogita_PCCOE
+  vmImage: Windows
   
 steps:
 - task: Docker@2
